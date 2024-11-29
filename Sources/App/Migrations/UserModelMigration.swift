@@ -9,7 +9,7 @@ import Fluent
 
 struct UserModelMigration: Migration {
     func prepare(on database: any FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("users")
+        database.schema(UserModel.schema)
             .id()
             .field("username", .string, .required)
             .field("email", .string, .required)
@@ -17,7 +17,6 @@ struct UserModelMigration: Migration {
             .field("bio", .string, .sql(.default("")))  // 设置 bio 默认值为空字符串
             .field("profile_image", .string, .sql(.default("")))  // 设置 profile_image 默认值为空字符串
             .field("status", .string, .required, .sql(.default("ACTIVE"))) // 设置默认状态
-            .field("role", .string, .required, .sql(.default("USER"))) // 设置默认角色
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
             .unique(on: "email")  // 确保 email 的唯一性
@@ -25,6 +24,6 @@ struct UserModelMigration: Migration {
     }
 
     func revert(on database: any FluentKit.Database) -> NIOCore.EventLoopFuture<Void> {
-        database.schema("users").delete()
+        database.schema(UserModel.schema).delete()
     }
 }

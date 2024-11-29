@@ -7,14 +7,14 @@
 
 import Vapor
 
-struct ResultResponse<T: Content>: Content {
-    let code: Int
+struct ResultResponse<T: Content>: Content,@unchecked Sendable {
+    let status: Int
     let message: String
     let data: T?
 
-    init(resultEnum: ResultEnum, data: T? = nil) {
-        self.code = resultEnum.rawValue
-        self.message = resultEnum.description
+    init(resultStatusEnum: ResultStatusEnum, data: T? = nil) {
+        self.status = resultStatusEnum.rawValue
+        self.message = resultStatusEnum.description
         self.data = data
     }
     
