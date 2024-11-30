@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  UserModelMigration.swift
+//
 //
 //  Created by 李伟 on 2024/10/10.
 //
@@ -14,12 +14,12 @@ struct UserModelMigration: Migration {
             .field("username", .string, .required)
             .field("email", .string, .required)
             .field("password_hash", .string, .required)
-            .field("bio", .string, .sql(.default("")))  // 设置 bio 默认值为空字符串
-            .field("profile_image", .string, .sql(.default("")))  // 设置 profile_image 默认值为空字符串
+            .field("bio", .string, .sql(.default(""))) // 设置 bio 默认值为空字符串
+            .field("profile_image", .string, .sql(.default(""))) // 设置 profile_image 默认值为空字符串
             .field("status", .string, .required, .sql(.default("ACTIVE"))) // 设置默认状态
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
-            .unique(on: "email")  // 确保 email 的唯一性
+            .unique(on: "email") // 确保 email 的唯一性
             .create()
     }
 

@@ -9,7 +9,7 @@ import Fluent
 
 struct RolePermissionModelMigration: Migration {
     func prepare(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(RolePermissionModel.schema)
+        database.schema(RolePermissionModel.schema)
             .id()
             .field("role_id", .uuid, .required, .references("roles", "id", onDelete: .cascade))
             .field("permission_id", .uuid, .required, .references("permissions", "id", onDelete: .cascade))
@@ -17,6 +17,6 @@ struct RolePermissionModelMigration: Migration {
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {
-        return database.schema(RolePermissionModel.schema).delete()
+        database.schema(RolePermissionModel.schema).delete()
     }
 }

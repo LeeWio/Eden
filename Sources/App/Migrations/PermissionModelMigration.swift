@@ -1,12 +1,12 @@
 //
-//  File.swift
+//  PermissionModelMigration.swift
 //  Eden
 //
 //  Created by lucas on 11/29/24.
 //
 
-import Vapor
 import Fluent
+import Vapor
 
 struct PermissionModelMigration: Migration {
     func prepare(on database: any Database) -> EventLoopFuture<Void> {
@@ -16,7 +16,7 @@ struct PermissionModelMigration: Migration {
             .field("description", .string, .required)
             .create()
     }
-    
+
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.schema(PermissionModel.schema).delete()
     }

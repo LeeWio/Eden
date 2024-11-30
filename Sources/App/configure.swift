@@ -1,9 +1,8 @@
-import NIOSSL
 import Fluent
-import Vapor
 import FluentMySQLDriver
 import JWT
-
+import NIOSSL
+import Vapor
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -28,8 +27,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(UserPermissionModelMigration())
     app.migrations.add(UserRoleModelMigration())
     app.migrations.add(RolePermissionModelMigration())
-    
-    
+    app.migrations.add(PostModelMigration())
+
     app.middleware.use(JwtAuthenticationMiddleware())
 
 //     Add HMAC with SHA-256 signer

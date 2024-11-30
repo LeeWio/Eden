@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  UserController.swift
+//
 //
 //  Created by 李伟 on 2024/10/27.
 //
@@ -35,17 +35,17 @@ extension UserRegistrationRequest: Validatable {
 final class UserController: RouteCollection {
     func boot(routes: any RoutesBuilder) throws {
         let users = routes.grouped("auth")
-        users.post("register", use: create)
+        users.post("create", use: create)
         users.post("authenticate", use: authenticateUser)
         users.get("getAll", use: getAll)
     }
 
     // User registration function
     func create(req: Request) async throws -> ResultResponse<String> {
-        try UserRegistrationRequest.validate(content: req)  // Validate input
+        try UserRegistrationRequest.validate(content: req) // Validate input
 
-        let registerUser = try req.content.decode(UserRegistrationRequest.self)  // Decode request data
-
+        let registerUser = try req.content.decode(UserRegistrationRequest.self) // Decode request data
+        
         // Ensure email and password are not empty
         guard !registerUser.email.isEmpty, !registerUser.password.isEmpty else {
             return ResultResponse(resultStatusEnum: .badRequest, data: "Email and password are required.")
@@ -66,24 +66,26 @@ final class UserController: RouteCollection {
             email: registerUser.email,
             passwordHash: Bcrypt.hash(registerUser.password)
         )
-        
+
         // Save the user in the database
         try await user.save(on: req.db)
 
         // Assign default role "USER" to the new user
         guard let defaultRole = try await RoleModel.query(on: req.db)
             .filter(\.$name == "USER")
-            .first() else {
-                throw Abort(.internalServerError, reason: "Default role not found.")
+            .first()
+        else {
+            throw Abort(.internalServerError, reason: "Default role not found.")
         }
-        
+
         // Assign "read" permission to the new user
         guard let readPermission = try await PermissionModel.query(on: req.db)
             .filter(\.$name == "read")
-            .first() else {
-                throw Abort(.internalServerError, reason: "Default permission not found.")
+            .first()
+        else {
+            throw Abort(.internalServerError, reason: "Default permission not found.")
         }
-        
+
         // Attach the role and permission to the user
         try await user.$roles.attach(defaultRole, on: req.db)
         try await user.$permissions.attach(readPermission, on: req.db)
@@ -91,20 +93,19 @@ final class UserController: RouteCollection {
         return ResultResponse(resultStatusEnum: .success, data: "Registration successful")
     }
 
-
     // User login function to authenticate the user and generate a JWT token
     func authenticateUser(req: Request) async throws -> ResultResponse<AuthUser> {
+        try LoginRequest.validate(content: req) // Validate input
 
-        try LoginRequest.validate(content: req)  // Validate input
-        
-        let loginRequest = try req.content.decode(LoginRequest.self)  // Decode login data
-        
-        print("email: \(loginRequest.email)")  // Debug print
+        let loginRequest = try req.content.decode(LoginRequest.self) // Decode login data
+
+        print("email: \(loginRequest.email)") // Debug print
 
         // Find the user by email
         guard let user = try await UserModel.query(on: req.db)
             .filter(\.$email == loginRequest.email)
-            .first() else {
+            .first()
+        else {
             return ResultResponse(resultStatusEnum: .unauthorized)
         }
 
@@ -118,15 +119,15 @@ final class UserController: RouteCollection {
         let permissions = try await user.$permissions.query(on: req.db).all()
 
         // Map roles and permissions to their names
-        let roleNames = roles.map { $0.name }
-        let permissionNames = permissions.map { $0.name }
+        let roleNames = roles.map(\.name)
+        let permissionNames = permissions.map(\.name)
 
         // Create a JWT payload with user info, roles, and permissions
         let payload = UserPayload(
             subject: .init(value: user.id!.uuidString),
             roles: roleNames,
             permissions: permissionNames,
-            expirationInMinutes: 1440  // Token expiration time (24 hours)
+            expirationInMinutes: 1440 // Token expiration time (24 hours)
         )
 
         // Generate the JWT token
@@ -140,17 +141,17 @@ final class UserController: RouteCollection {
             authorization: token,
             avatarUrl: user.profileImage ?? "https://i.pravatar.cc/150?u=a042581f4e29026704d"
         )
-        
+
         return ResultResponse(resultStatusEnum: .success, data: authUser)
     }
 
     // Read All Users
     // 获取所有用户
     func getAll(req: Request) throws -> EventLoopFuture<ResultResponse<[UserModel]>> {
-        return UserModel.query(on: req.db).all().map { users in
+        UserModel.query(on: req.db).all().map { users in
             // 将结果封装在 ResultResponse 中
-            return ResultResponse(resultStatusEnum: .success, data: users)
-        }.flatMapError { error in
+            ResultResponse(resultStatusEnum: .success, data: users)
+        }.flatMapError { _ in
             // 处理错误并返回适当的响应
             let response = ResultResponse<[UserModel]>(resultStatusEnum: .badRequest)
             return req.eventLoop.makeSucceededFuture(response)

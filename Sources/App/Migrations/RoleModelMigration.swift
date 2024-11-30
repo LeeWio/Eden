@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RoleModelMigration.swift
 //  Eden
 //
 //  Created by lucas on 11/29/24.
@@ -15,7 +15,7 @@ struct RoleModelMigration: Migration {
             .field("description", .string, .required)
             .create()
     }
-    
+
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.schema(RoleModel.schema).delete()
     }

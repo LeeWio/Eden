@@ -1,16 +1,16 @@
 //
-//  File.swift
+//  UserRoleModel.swift
 //  Eden
 //
 //  Created by lucas on 11/29/24.
 //
 
-import Vapor
 import Fluent
+import Vapor
 
-final class UserRoleModel: Model,@unchecked Sendable {
+final class UserRoleModel: Model, @unchecked Sendable {
     static let schema = "user_role"
-    
+
     @ID(key: .id)
     var id: UUID?
 
@@ -24,8 +24,7 @@ final class UserRoleModel: Model,@unchecked Sendable {
 
     init(id: UUID? = nil, userID: UUID, roleID: UUID) {
         self.id = id
-        self.$user.id = userID
-        self.$role.id = roleID
+        $user.id = userID
+        $role.id = roleID
     }
-    
 }

@@ -1,15 +1,15 @@
 //
-//  File.swift
-//  
+//  UserModel.swift
+//
 //
 //  Created by 李伟 on 2024/10/9.
 //
 
 import Fluent
-import Vapor
 import JWTKit
+import Vapor
 
-final class UserModel: Model,Content, @unchecked Sendable {
+final class UserModel: Model, Content, @unchecked Sendable {
     // Table name
     static let schema = "users"
 
@@ -40,13 +40,13 @@ final class UserModel: Model,Content, @unchecked Sendable {
     // Status field using enum
     @Field(key: "status")
     var status: UserStatusEnum
-    
+
     @Siblings(through: UserRoleModel.self, from: \.$user, to: \.$role)
     var roles: [RoleModel]
-    
+
     @Siblings(through: UserPermissionModel.self, from: \.$user, to: \.$permission)
     var permissions: [PermissionModel]
-    
+
     // Created timestamp
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
@@ -78,8 +78,6 @@ final class UserModel: Model,Content, @unchecked Sendable {
     }
 }
 
-
-
 // Extend User to make it Authenticatable
 extension UserModel: ModelAuthenticatable {
     static let usernameKey = \UserModel.$email
@@ -88,21 +86,19 @@ extension UserModel: ModelAuthenticatable {
     // Password verification logic
     func verify(password: String) throws -> Bool {
         // Using bcrypt to verify password hash
-        try Bcrypt.verify(password, created: self.passwordHash)
+        try Bcrypt.verify(password, created: passwordHash)
     }
 }
 
-
 // JWT payload structure.
 struct UserPayload: JWTPayload {
-
     // Maps the longer Swift property names to the
     // shortened keys used in the JWT payload.
     enum CodingKeys: String, CodingKey {
         case subject = "sub"
         case expiration = "exp"
-        case roles = "roles"
-        case permissions = "permissions"
+        case roles
+        case permissions
     }
 
     // The "sub" (subject) claim identifies the principal that is the
@@ -112,9 +108,9 @@ struct UserPayload: JWTPayload {
     // The "exp" (expiration time) claim identifies the expiration time on
     // or after which the JWT MUST NOT be accepted for processing.
     var expiration: ExpirationClaim
-    
+
     var roles: [String]
-    
+
     var permissions: [String]
 
     init(subject: SubjectClaim, roles: [String], permissions: [String], expirationInMinutes: Int = 60) {
@@ -124,15 +120,15 @@ struct UserPayload: JWTPayload {
 
         // 设置过期时间
         let expirationDate = Date().addingTimeInterval(TimeInterval(expirationInMinutes * 60))
-        self.expiration = ExpirationClaim(value: expirationDate)
+        expiration = ExpirationClaim(value: expirationDate)
     }
 
     // Run any additional verification logic beyond
     // signature verification here.
     // Since we have an ExpirationClaim, we will
     // call its verify method.
-    func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
-        try self.expiration.verifyNotExpired()
+    func verify(using _: some JWTKit.JWTAlgorithm) async throws {
+        try expiration.verifyNotExpired()
     }
 }
 
@@ -157,4 +153,3 @@ struct AuthUser: Content {
         self.avatarUrl = avatarUrl ?? "https://i.pravatar.cc/150?u=a042581f4e29026704d"
     }
 }
-
