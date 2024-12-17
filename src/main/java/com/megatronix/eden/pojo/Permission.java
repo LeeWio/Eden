@@ -7,11 +7,13 @@ import java.util.Set;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table("permission")
+@Table(name = "permission")
 @Data
 public class Permission implements Serializable {
   @Transient
@@ -36,11 +38,8 @@ public class Permission implements Serializable {
   @Column(name = "update_at")
   private Date updateAt;
 
-  @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
-  @JoinTable(
-    name = "user_permission"
-    joinColumns = @JoinColumn(name = "permission_id",referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
-  )
+  @JsonIgnoreProperties(value = { "permissions" })
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+  @JoinTable(name = "user_permission", joinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
 }

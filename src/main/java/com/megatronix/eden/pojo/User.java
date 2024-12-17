@@ -1,15 +1,12 @@
 package com.megatronix.eden.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.megatronix.eden.enums.GenderEnum;
 import com.megatronix.eden.enums.UserStatusEnum;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,7 +16,10 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
-@Table("user")
+@Table(name = "user")
+@Data
+@Setter
+@Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
@@ -35,7 +35,7 @@ public class User implements Serializable {
   @Column(name = "username")
   private String username;
 
-  @Column(name = "email")
+  @Column(name = "email", unique = true, nullable = false)
   private String email;
 
   @Column(name = "password")
@@ -69,12 +69,9 @@ public class User implements Serializable {
   @LastModifiedDate
   private Date updateAt;
 
-  @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
-  @JoinTable(
-    name = "user_role"
-    joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name = "role_id",referencedColumnName = "id")
-  )
+  @JsonIgnoreProperties(value = { "users" })
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+  @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
 
 }
