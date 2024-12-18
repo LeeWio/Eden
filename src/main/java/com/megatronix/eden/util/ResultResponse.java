@@ -23,7 +23,7 @@ public class ResultResponse<T> {
     return new ResultResponse<>(resultEnum, data);
   }
 
-  public static <T> ResultResponse<T> roor(ResultEnum resultEnum) {
+  public static <T> ResultResponse<T> error(ResultEnum resultEnum) {
     return new ResultResponse<>(resultEnum);
   }
 

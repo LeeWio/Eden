@@ -38,8 +38,7 @@ public class Permission implements Serializable {
   @Column(name = "update_at")
   private Date updateAt;
 
-  @JsonIgnoreProperties(value = { "permissions" })
   @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-  @JoinTable(name = "user_permission", joinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+  @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
 }

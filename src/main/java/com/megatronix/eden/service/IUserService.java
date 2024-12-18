@@ -9,4 +9,6 @@ import com.megatronix.eden.util.ResultResponse;
 @Service
 public interface IUserService {
   ResultResponse<AuthUser> authenticateUser(UserAuthPayload userAuthPayload);
+
+  ResultResponse<String> createAccount(UserAuthPayload userAuthPayload);
 }
