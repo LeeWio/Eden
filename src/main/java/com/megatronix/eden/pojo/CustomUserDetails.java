@@ -13,7 +13,9 @@ import com.megatronix.eden.enums.UserStatusEnum;
 @Data
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
+
   private User user;
+
   private final Collection<? extends GrantedAuthority> authorities;
 
   @Override
@@ -26,25 +28,48 @@ public class CustomUserDetails implements UserDetails {
     return user.getEmail();
   }
 
+  /**
+   * Determines if the account is expired.
+   * The account is considered expired if the status is INACTIVE (not activated).
+   * 
+   * @return true if the account is not expired
+   */
   @Override
   public boolean isAccountNonExpired() {
-    return user.getStatus() != UserStatusEnum.BANNED;
+    return user.getStatus() != UserStatusEnum.INACTIVE;
   }
 
+  /**
+   * Determines if the account is locked.
+   * The account is considered locked if the status is BANNED (disabled).
+   * 
+   * @return true if the account is not locked
+   */
   @Override
   public boolean isAccountNonLocked() {
     return user.getStatus() != UserStatusEnum.BANNED;
   }
 
+  /**
+   * Determines if the credentials (password) are expired.
+   * Credentials are considered expired if the account status is BANNED (disabled)
+   * or DELETED.
+   * 
+   * @return true if the credentials are not expired
+   */
   @Override
   public boolean isCredentialsNonExpired() {
-    // 如果 status 是 4，则凭据已过期
-    return user.getStatus() != UserStatusEnum.BANNED;
+    return user.getStatus() != UserStatusEnum.BANNED && user.getStatus() != UserStatusEnum.DELETED;
   }
 
+  /**
+   * Determines if the account is enabled.
+   * The account is enabled only if the status is ACTIVE.
+   * 
+   * @return true if the account is enabled
+   */
   @Override
   public boolean isEnabled() {
-    // 只有 status 是 0 时，账号才启用
     return user.getStatus() == UserStatusEnum.ACTIVE;
   }
 }

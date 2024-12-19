@@ -39,7 +39,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
       return roleAuthorities.stream();
 
     }).collect(Collectors.toSet());
-    log.info("account is enable:{}", user.getStatus());
     return new CustomUserDetails(user, authorities);
   }
 }

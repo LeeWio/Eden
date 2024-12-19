@@ -1,24 +1,33 @@
 spring:
-    jackson:
-        time-zone: GMT+8
-        date-format: yyyy-MM-dd HH:mm:ss
-    # 数据库
-    datasource:
-        username: root
-        password: wei.li.laba
-        url: jdbc:mysql://localhost:3306/blog?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8
-    data:
-        redis:
-            host: 127.0.0.1
-            port: 6379 
-            database: 0
-    jpa:
-        show-sql: true
-    servlet:
-        multipart:
-            max-file-size: 10MB
-            max-request-size: 10MB
-    mvc:
-        static-path-pattern: /**
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  # 数据库
+  datasource:
+    username: root
+    password: wei.li.laba
+    url: jdbc:mysql://localhost:3306/blog?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+  jpa:
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mvc:
+    static-path-pattern: /**
 server:
-    port: 8080
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+  show-actuat: true
