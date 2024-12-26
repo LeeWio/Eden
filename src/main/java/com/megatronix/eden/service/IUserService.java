@@ -2,7 +2,6 @@ package com.megatronix.eden.service;
 
 import java.util.List;
 
-import org.apache.logging.log4j.message.ReusableObjectMessage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +19,37 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Service
 @Tag(name = "User Service", description = "Service to handle user authentication and account management")
 public interface IUserService {
+
+  /**
+   * Request a verification code for the provided email address.
+   * This API will send a verification code to the user's email.
+   * 
+   * @param email the email address to which the verification code will be sent
+   * @return a response indicating the status of the operation
+   */
+  @Operation(summary = "Request Verification Code", description = "This API sends a verification code to the provided email address. It is commonly used for operations like password recovery or account verification.")
+  ResultResponse<String> requestVerificationCode(
+      @Parameter(description = "The email address to which the verification code will be sent", required = true) String email);
+
+  /**
+   * Validate the captcha entered by the user for the provided email address.
+   * This API will verify the captcha code entered by the user. If the captcha is
+   * valid,
+   * the system will return the authenticated user details.
+   * 
+   * @param email            the email address associated with the captcha request
+   * @param verificationCode the captcha code entered by the user for verification
+   * @return a response containing the authenticated user details if the captcha
+   *         is valid,
+   *         or an error message if the captcha is invalid or the user cannot be
+   *         found
+   */
+  @Operation(summary = "Validate Captcha", description = "This API validates the captcha entered by the user for the specified email address. "
+      + "If the captcha is correct, the user details will be returned for further authentication. "
+      + "It is commonly used for user login or multi-factor authentication.")
+  ResultResponse<AuthUser> validateCaptcha(
+      @Parameter(description = "The email address associated with the captcha verification", required = true) String email,
+      @Parameter(description = "The captcha code entered by the user", required = true) String verificationCode);
 
   /**
    * Authenticates a user using the provided authentication details.

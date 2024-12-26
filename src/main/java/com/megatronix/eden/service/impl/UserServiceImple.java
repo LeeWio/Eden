@@ -1,11 +1,13 @@
 package com.megatronix.eden.service.impl;
 
-import java.lang.module.ModuleDescriptor.Exports;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import org.springframework.dao.DataAccessException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +18,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.megatronix.eden.constant.RabbitConstant;
+import com.megatronix.eden.constant.RedisConstant;
 import com.megatronix.eden.constant.RoleConstant;
 import com.megatronix.eden.enums.ResultEnum;
 import com.megatronix.eden.enums.UserStatusEnum;
@@ -26,11 +30,14 @@ import com.megatronix.eden.repository.RoleRepository;
 import com.megatronix.eden.repository.UserRepository;
 import com.megatronix.eden.service.IUserService;
 import com.megatronix.eden.util.JwtUtil;
+import com.megatronix.eden.util.RedisUtil;
 import com.megatronix.eden.util.ResultResponse;
+
 import com.megatronix.eden.pojo.User;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
@@ -54,6 +61,71 @@ public class UserServiceImple implements IUserService {
 
   @Resource
   private JwtUtil jwtUtil;
+
+  @Resource
+  private RedisUtil redisUtil;
+
+  @Resource
+  private RabbitTemplate rabbitTemplate;
+
+  @Override
+  public ResultResponse<String> requestVerificationCode(String email) {
+
+    if (!Validator.isEmail(email)) {
+      return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
+    }
+
+    if (!userRepository.existsUserByEmail(email)) {
+      return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
+    }
+
+    String captcha = RandomUtil.randomNumbers(6);
+
+    redisUtil.set(RedisConstant.CAPTCHA_PREFIX + email, captcha, 10, TimeUnit.MINUTES);
+
+    Map<String, String> message = new HashMap<>();
+    message.put("email", email);
+    message.put("captcha", captcha);
+
+    rabbitTemplate.convertAndSend(RabbitConstant.CAPTCHA_EXCHANGE, RabbitConstant.CAPTCHA_ROUTING_KEY, message);
+
+    return ResultResponse.success(ResultEnum.SUCCESS, "OTP sent successfully.");
+  }
+
+  @Override
+  public ResultResponse<AuthUser> validateCaptcha(String email, String verificationCode) {
+
+    if (!Validator.isEmail(email)) {
+      return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
+    }
+
+    if (!userRepository.existsUserByEmail(email)) {
+      return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
+    }
+
+    String captcha = redisUtil.get(RedisConstant.CAPTCHA_PREFIX + email, String.class).orElse(null);
+
+    if (StrUtil.isBlank(captcha)) {
+      return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
+    }
+
+    if (StrUtil.equals(verificationCode, captcha)) {
+
+      User user = userRepository.findUserByemail(email)
+          .orElseThrow(() -> new UsernameNotFoundException(ResultEnum.USER_NOT_FOUND.getMessage()));
+
+      Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null);
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      String authorization = jwtUtil.generateAuthorization(authentication);
+
+      return ResultResponse.success(ResultEnum.SUCCESS,
+          new AuthUser(user.getId(), user.getUsername(), user.getEmail(), authorization,
+              Optional.of(user.getAvatar())));
+    }
+    return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
+  }
 
   @Override
   public ResultResponse<AuthUser> authenticateUser(UserAuthPayload userAuthPayload) {

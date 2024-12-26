@@ -23,8 +23,11 @@ import com.megatronix.eden.util.ResultResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -43,6 +46,69 @@ public class UserController {
   @PostMapping
   public ResultResponse<String> createAccount(@RequestBody UserAuthPayload userAuthPayload) {
     return userService.createAccount(userAuthPayload);
+  }
+
+  /**
+   * Validate the captcha entered by the user for a given email.
+   * This API verifies the captcha code entered by the user. If the captcha is
+   * correct,
+   * the system will return the corresponding authenticated user details.
+   * 
+   * @param email            the email address associated with the captcha request
+   * @param verificationCode the captcha code entered by the user
+   * @return a response containing the authenticated user details if the captcha
+   *         is valid,
+   *         or an error message if the captcha is invalid
+   * 
+   * @Operation(summary = "Validate Captcha", description = "This API validates
+   *                    the captcha entered by the user for the specified email
+   *                    address."
+   *                    + " If the captcha is correct, the user details will be
+   *                    returned for further authentication.")
+   * @ApiResponses(value = {
+   * @ApiResponse(responseCode = "200", description = "Captcha validated
+   *                           successfully, user details returned"),
+   * @ApiResponse(responseCode = "400", description = "Invalid captcha code or
+   *                           email address"),
+   * @ApiResponse(responseCode = "404", description = "User not found for the
+   *                           provided email address"),
+   * @ApiResponse(responseCode = "500", description = "Internal server error
+   *                           during captcha validation")
+   *                           })
+   */
+  @Operation(summary = "Validate Captcha", description = "This API validates the captcha entered by the user for the specified email address. "
+      + "If the captcha is correct, the user details will be returned for further authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Captcha validated successfully, user details returned"),
+      @ApiResponse(responseCode = "400", description = "Invalid captcha code or email address"),
+      @ApiResponse(responseCode = "404", description = "User not found for the provided email address"),
+      @ApiResponse(responseCode = "500", description = "Internal server error during captcha validation")
+  })
+  @PostMapping("/validateCaptcha/{email}/{verificationCode}")
+  public ResultResponse<AuthUser> validateCaptcha(
+      @PathVariable("email") String email,
+      @PathVariable("verificationCode") String verificationCode) {
+    return userService.validateCaptcha(email, verificationCode);
+  }
+
+  /**
+   * Request a verification code for the provided email address.
+   * This API will send a verification code to the user's email.
+   * 
+   * @param email the email address to which the verification code will be sent
+   * @return a response indicating the status of the operation
+   */
+  @Operation(summary = "Request Verification Code", description = "This API sends a verification code to the provided email address. "
+      + "It is commonly used for operations like password recovery or account verification.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Verification code sent successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid email address format"),
+      @ApiResponse(responseCode = "500", description = "Failed to send verification code due to server error")
+  })
+  @PostMapping("/requestVerificationCode/{email}")
+  public ResultResponse<String> requestVerificationCode(
+      @Parameter(description = "The email address to which the verification code will be sent", required = true) @PathVariable @Email String email) {
+    return userService.requestVerificationCode(email);
   }
 
   /**
