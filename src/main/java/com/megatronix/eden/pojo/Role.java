@@ -19,7 +19,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 public class Role implements Serializable {
   @Transient
-  public static final Long SERIAL_VERSION_RID = -6849794870754623710L;
+  public static final long SERIAL_VERSION_RID = -6849794870754623710L;
 
   @Id
   @Column(name = "id")

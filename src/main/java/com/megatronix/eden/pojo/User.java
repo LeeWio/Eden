@@ -27,7 +27,7 @@ import java.util.Set;
 public class User implements Serializable {
 
   @Transient
-  private static final Long SERIAL_VERSION_UID = -6249794470754667710L;
+  private static final long SERIAL_VERSION_UID = -6249794470754667710L;
 
   @Id
   @Column(name = "id")

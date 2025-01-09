@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class Permission implements Serializable {
   @Transient
-  private static final Long SERIAL_VERSION_PID = -6849794870754623710L;
+  private static final long SERIAL_VERSION_PID = -6849794870754623710L;
 
   @Id
   @Column(name = "id")
