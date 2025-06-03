@@ -10,6 +10,8 @@ public enum ResultEnum {
   USER_NOT_FOUND(4002, "user not found."),
   USER_EXIST(4003, "user alealy exist."),
   INVALID_CAPTCHA(4004, "Invalid captcha."),
+  FILE_NOT_FOUNT(4005, "file not found."),
+  FILE_NOT_UPLOAD(4006, "Failed to upload one of the files."),
   INVALID_STATUS_TRANSITION(41001, "invalid status transition.");
 
   private final Integer status;

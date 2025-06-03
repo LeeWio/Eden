@@ -8,6 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.megatronix.eden.enums.FileTypeEnum;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -44,16 +46,17 @@ public class File implements Serializable {
   private Long fileSize;
 
   @Column(name = "file_type")
+  @Enumerated(EnumType.ORDINAL)
   @Schema(description = "Custom file type tag, used for business classification")
-  private String fileType;
+  private FileTypeEnum fileType = FileTypeEnum.IMAGE;
 
   @Column(name = "create_at")
   @CreatedDate
   @Schema(description = "Timestamp when the file was uploaded")
-  private Date createAt;
+  private Date createdAt;
 
   @Column(name = "update_at")
   @LastModifiedDate
   @Schema(description = "Timestamp when the file metadata was last updated")
-  private Date updateAt;
+  private Date updatedAt;
 }

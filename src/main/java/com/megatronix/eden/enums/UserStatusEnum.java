@@ -1,7 +1,6 @@
 package com.megatronix.eden.enums;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
 
 @Schema(description = "User account status enumeration")
 public enum UserStatusEnum {

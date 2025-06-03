@@ -1,6 +1,6 @@
 package com.megatronix.eden.enums;
 
-public enum FileUploadEnum {
+public enum FileTypeEnum {
   IMAGE,
   VIDEO,
   DOCUMENT,

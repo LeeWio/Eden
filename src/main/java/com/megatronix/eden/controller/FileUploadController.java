@@ -1,35 +1,40 @@
 package com.megatronix.eden.controller;
 
+import com.megatronix.eden.enums.FileTypeEnum;
+import com.megatronix.eden.pojo.File;
+import com.megatronix.eden.service.IFileService;
 import com.megatronix.eden.util.ResultResponse;
-import com.megatronix.eden.enums.FileUploadEnum;
 
-import lombok.Data;
-
-import java.util.List;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/file")
+@RequestMapping("/file")
 public class FileUploadController {
 
+  @Resource
+  private IFileService fileService;
+
   @PostMapping("/upload")
-  public ResultResponse<List<FileUploadResponse>> uploadFiles(
-      @RequestParam("files") List<MultipartFile> files,
-      @RequestParam(value = "type", required = false) FileUploadEnum type
-
-  ) {
-    return null;
-
+  public ResultResponse<File> uploadFile(
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "type", required = false) FileTypeEnum type) throws IOException {
+    return fileService.uploadFile(file, type);
   }
-}
 
-@Data
-class FileUploadResponse {
-  private String fileName;
-  private String fileUrl;
+  @PostMapping("/uploads")
+  public ResultResponse<List<File>> uploadFiles(
+      @RequestParam("files") MultipartFile[] files,
+      @RequestParam(value = "type", required = false) FileTypeEnum type) throws IOException {
+    return fileService.uploadFiles(files, type);
+  }
+
+  @GetMapping("/{id}")
+  public ResultResponse<File> getFileById(@PathVariable String id) {
+    return fileService.getFileById(id);
+  }
 }
