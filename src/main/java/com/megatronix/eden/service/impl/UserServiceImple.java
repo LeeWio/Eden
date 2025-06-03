@@ -1,12 +1,35 @@
 package com.megatronix.eden.service.impl;
 
+import com.megatronix.eden.constant.RabbitConstant;
+import com.megatronix.eden.constant.RedisConstant;
+import com.megatronix.eden.constant.RoleConstant;
+import com.megatronix.eden.enums.ResultEnum;
+import com.megatronix.eden.enums.UserStatusEnum;
+import com.megatronix.eden.pojo.AuthUser;
+import com.megatronix.eden.pojo.Role;
+import com.megatronix.eden.pojo.User;
+import com.megatronix.eden.pojo.UserAuthPayload;
+import com.megatronix.eden.repository.RoleRepository;
+import com.megatronix.eden.repository.UserRepository;
+import com.megatronix.eden.service.IUserService;
+import com.megatronix.eden.util.JwtUtil;
+import com.megatronix.eden.util.RedisUtil;
+import com.megatronix.eden.util.ResultResponse;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import jakarta.annotation.Resource;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,31 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.megatronix.eden.constant.RabbitConstant;
-import com.megatronix.eden.constant.RedisConstant;
-import com.megatronix.eden.constant.RoleConstant;
-import com.megatronix.eden.enums.ResultEnum;
-import com.megatronix.eden.enums.UserStatusEnum;
-import com.megatronix.eden.pojo.AuthUser;
-import com.megatronix.eden.pojo.Role;
-import com.megatronix.eden.pojo.UserAuthPayload;
-import com.megatronix.eden.repository.RoleRepository;
-import com.megatronix.eden.repository.UserRepository;
-import com.megatronix.eden.service.IUserService;
-import com.megatronix.eden.util.JwtUtil;
-import com.megatronix.eden.util.RedisUtil;
-import com.megatronix.eden.util.ResultResponse;
-
-import com.megatronix.eden.pojo.User;
-
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import jakarta.annotation.Resource;
-import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -70,7 +69,6 @@ public class UserServiceImple implements IUserService {
 
   @Override
   public ResultResponse<String> requestVerificationCode(String email) {
-
     if (!Validator.isEmail(email)) {
       return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
     }
@@ -153,7 +151,7 @@ public class UserServiceImple implements IUserService {
 
   @Override
   @Transactional
-  public ResultResponse<String> createAccount(UserAuthPayload userAuthPayload) {
+  public ResultResponse<AuthUser> createAccount(UserAuthPayload userAuthPayload) {
 
     if (!Validator.isEmail(userAuthPayload.getEmail())) {
       return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
@@ -178,7 +176,7 @@ public class UserServiceImple implements IUserService {
 
     userRepository.save(user);
 
-    return ResultResponse.success(ResultEnum.SUCCESS, "User created successfully");
+    return authenticateUser(userAuthPayload);
   }
 
   @Override

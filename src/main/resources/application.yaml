@@ -15,7 +15,7 @@ spring:
   # 数据库
   datasource:
     username: root
-    password: wei.li.laba
+    password: Wei.Li.Laba00
     url: jdbc:mysql://localhost:3306/blog?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8
   data:
     redis:
@@ -34,6 +34,11 @@ spring:
       max-request-size: 10MB
 server:
   port: 8080
+
+logging:
+  level:
+    root: INFO
+    org.springframework: DEBUG
 
 springdoc:
   api-docs:

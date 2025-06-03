@@ -1,7 +1,21 @@
 package com.megatronix.eden.controller;
 
-import java.util.List;
+import com.megatronix.eden.pojo.AuthUser;
+import com.megatronix.eden.pojo.User;
+import com.megatronix.eden.enums.UserStatusEnum;
+import com.megatronix.eden.pojo.UserAuthPayload;
+import com.megatronix.eden.service.IUserService;
+import com.megatronix.eden.util.ResultResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.constraints.Email;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,22 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.megatronix.eden.enums.UserStatusEnum;
-import com.megatronix.eden.pojo.AuthUser;
-import com.megatronix.eden.pojo.User;
-import com.megatronix.eden.pojo.UserAuthPayload;
-import com.megatronix.eden.service.IUserService;
-import com.megatronix.eden.util.ResultResponse;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
-import jakarta.validation.constraints.Email;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/auth")
@@ -44,7 +42,7 @@ public class UserController {
   }
 
   @PostMapping
-  public ResultResponse<String> createAccount(@RequestBody UserAuthPayload userAuthPayload) {
+  public ResultResponse<AuthUser> createAccount(@RequestBody UserAuthPayload userAuthPayload) {
     return userService.createAccount(userAuthPayload);
   }
 

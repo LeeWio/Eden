@@ -27,7 +27,7 @@ import java.util.Set;
 public class User implements Serializable {
 
   @Transient
-  private static final long SERIAL_VERSION_UID = -6249794470754667710L;
+  private static final Long SERIAL_VERSION_UID = -6249794470754667710L;
 
   @Id
   @Column(name = "id")
@@ -67,7 +67,7 @@ public class User implements Serializable {
   @Column(name = "status")
   @Enumerated(EnumType.ORDINAL)
   @Schema(description = "Status of the user", allowableValues = { "PENDING", "ACTIVE", "INACTIVE" })
-  private UserStatusEnum status = UserStatusEnum.PENDING;
+  private UserStatusEnum status = UserStatusEnum.ACTIVE;
 
   @Column(name = "birth_date")
   @Schema(description = "Birth date of the user")
@@ -85,7 +85,7 @@ public class User implements Serializable {
 
   @Schema(description = "Roles assigned to the user")
   @JsonIgnoreProperties(value = { "users" })
-  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
   private Set<Role> roles;
 

@@ -1,6 +1,6 @@
 package com.megatronix.eden.config;
 
-import jakarta.annotation.Resource;
+import java.util.concurrent.Executor;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -12,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
-
-import java.util.concurrent.Executor;
+import jakarta.annotation.Resource;
 
 @Configuration
 public class RabbitConfig implements RabbitListenerConfigurer {

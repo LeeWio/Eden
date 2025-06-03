@@ -69,7 +69,7 @@ public interface IUserService {
    *         operation
    */
   @Operation(summary = "Create User Account", description = "Creates a new user account based on the provided details.")
-  ResultResponse<String> createAccount(
+  ResultResponse<AuthUser> createAccount(
       @Parameter(description = "User authentication payload containing registration information", required = true) UserAuthPayload userAuthPayload);
 
   /**
