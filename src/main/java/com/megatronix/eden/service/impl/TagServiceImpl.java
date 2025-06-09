@@ -1,5 +1,7 @@
 package com.megatronix.eden.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.megatronix.eden.enums.ResultEnum;
@@ -19,5 +21,10 @@ public class TagServiceImpl implements ITagService {
   public ResultResponse<String> create(Tag tag) {
     tagRepository.save(tag);
     return ResultResponse.success(ResultEnum.SUCCESS, "adf");
+  }
+
+  @Override
+  public ResultResponse<List<Tag>> get() {
+    return ResultResponse.success(ResultEnum.SUCCESS, tagRepository.findAll());
   }
 }

@@ -1,5 +1,7 @@
 package com.megatronix.eden.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.megatronix.eden.enums.ResultEnum;
@@ -16,9 +18,15 @@ public class CategoryServiceImpl implements ICategoryService {
   @Resource
   private CategoryRepository categoryRepository;
 
+  @Override
   public ResultResponse<String> create(Category category) {
     categoryRepository.save(category);
     return ResultResponse.success(ResultEnum.SUCCESS, "create successfullu.");
+  }
+
+  @Override
+  public ResultResponse<List<Category>> get() {
+    return ResultResponse.success(ResultEnum.SUCCESS, categoryRepository.findAll());
   }
 
 }

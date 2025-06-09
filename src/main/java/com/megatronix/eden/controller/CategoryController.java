@@ -1,5 +1,8 @@
 package com.megatronix.eden.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,5 +25,10 @@ public class CategoryController {
   @PostMapping
   public ResultResponse<String> create(@RequestBody Category category) {
     return categoryService.create(category);
+  }
+
+  @GetMapping
+  public ResultResponse<List<Category>> get() {
+    return categoryService.get();
   }
 }

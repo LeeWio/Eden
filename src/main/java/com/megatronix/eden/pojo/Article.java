@@ -1,10 +1,12 @@
 package com.megatronix.eden.pojo;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.util.Set;
 
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,22 +16,16 @@ import com.megatronix.eden.enums.ArticleStatusEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Table(name = "article")
 @Data
-@Setter
-@Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Schema(description = "Represents an article in the blogging system.")
 public class Article implements Serializable {
   @Transient
   private static final long serialVersionUID = -6249794470754667710L;
-
   @Id
   @Column(name = "id", nullable = false, updatable = false)
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -57,6 +53,8 @@ public class Article implements Serializable {
   @Schema(description = "Current status of the article.", example = "PUBLISHED")
   private ArticleStatusEnum status = ArticleStatusEnum.REVIEW;
 
+  @CreatedBy
+  @LastModifiedBy
   @Column(name = "author_id", nullable = false)
   @Schema(description = "Unique identifier for the author of the article.", example = "123e4567-e89b-12d3-a456-426614174001")
   private String authorId;
