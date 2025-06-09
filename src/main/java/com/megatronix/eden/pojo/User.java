@@ -73,6 +73,10 @@ public class User implements Serializable {
   @Schema(description = "Birth date of the user")
   private Date birthDate;
 
+  @Column(name = "last_login_ip", length = 45)
+  @Schema(description = "The last login IP address of the user (IPv4 or IPv6)", example = "192.168.1.1")
+  private String lastLoginIp;
+
   @Column(name = "create_at")
   @CreatedDate
   @Schema(description = "Date and time when the user was created")

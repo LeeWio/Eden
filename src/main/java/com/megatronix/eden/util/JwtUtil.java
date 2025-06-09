@@ -27,9 +27,7 @@ public class JwtUtil {
     Map<String, Object> map = new HashMap<String, Object>() {
       {
         put("email", authentication.getName());
-        put("iat", DateUtil.date());
-        put("nbf", DateUtil.offsetDay(DateUtil.date(), 1));
-        put("ext", DateUtil.offsetDay(DateUtil.date(), 7));
+        put("exp", DateUtil.offsetHour(DateUtil.date(), 2));
       }
     };
 

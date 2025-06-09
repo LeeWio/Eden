@@ -6,12 +6,14 @@ import com.megatronix.eden.enums.UserStatusEnum;
 import com.megatronix.eden.pojo.UserAuthPayload;
 import com.megatronix.eden.service.IUserService;
 import com.megatronix.eden.util.ResultResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,12 +39,14 @@ public class UserController {
   private IUserService userService;
 
   @PostMapping("/authenticate")
-  public ResultResponse<AuthUser> authenticateUser(@RequestBody UserAuthPayload userAuthPayload) {
-    return userService.authenticateUser(userAuthPayload);
+  public ResultResponse<AuthUser> authenticateUser(@RequestBody UserAuthPayload userAuthPayload,
+      HttpServletRequest httpServerRequest) {
+    return userService.authenticateUser(userAuthPayload, httpServerRequest);
   }
 
   @PostMapping
-  public ResultResponse<AuthUser> createAccount(@RequestBody UserAuthPayload userAuthPayload) {
+  public ResultResponse<AuthUser> createAccount(@RequestBody UserAuthPayload userAuthPayload,
+      HttpServletRequest httpServerRequest) {
     return userService.createAccount(userAuthPayload);
   }
 

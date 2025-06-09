@@ -15,4 +15,5 @@ public class AuthUser {
   private String email;
   private String authorization;
   private Optional<String> avatarUrl;
+  private String lastLoginIp;
 }

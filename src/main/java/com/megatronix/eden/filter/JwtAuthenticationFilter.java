@@ -7,10 +7,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.megatronix.eden.pojo.CustomUserDetails;
+import com.megatronix.eden.pojo.User;
+import com.megatronix.eden.service.IUserService;
 import com.megatronix.eden.util.JwtUtil;
 
 import cn.hutool.core.util.StrUtil;
@@ -26,22 +30,40 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Resource
   private JwtUtil jwtUtil;
+
   @Resource
   private UserDetailsService userDetailsService;
+
+  @Resource
+  private IUserService userService;
 
   @Override
   public void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
       @Nonnull FilterChain filterChain) throws IOException, ServletException {
+
     String authorization = obtainAuthorization(request);
+
     if (StrUtil.isNotBlank(authorization) && jwtUtil.validateAuthorization(authorization)) {
+
       String email = jwtUtil.getEmailFromAuthorization(authorization);
+
       UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
       UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
           userDetails, null, userDetails.getAuthorities());
 
-      usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      WebAuthenticationDetails webAuthenticationDetails = new WebAuthenticationDetailsSource().buildDetails(request);
+      usernamePasswordAuthenticationToken.setDetails(webAuthenticationDetails);
+
+      if (usernamePasswordAuthenticationToken.getPrincipal() instanceof CustomUserDetails customUserDetails) {
+        User user = customUserDetails.getUser();
+        userService.updateLastLoginIp(user.getId(), webAuthenticationDetails.getRemoteAddress());
+      }
+
       SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
     }
+
     filterChain.doFilter(request, response);
   }
 
@@ -52,4 +74,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     return bearerAuthorization;
   }
+
 }

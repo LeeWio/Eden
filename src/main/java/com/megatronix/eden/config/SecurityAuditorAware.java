@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.megatronix.eden.pojo.CustomUserDetails;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
@@ -16,6 +18,17 @@ public class SecurityAuditorAware implements AuditorAware<String> {
   @Override
   public @NonNull Optional<String> getCurrentAuditor() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    return Optional.of("0512218a-3f1b-486b-b2bd-1bb66c80ba0b");
+
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return Optional.empty();
+    }
+
+    Object object = authentication.getPrincipal();
+
+    if (object instanceof CustomUserDetails) {
+      return Optional.of(((CustomUserDetails) object).getUser().getId());
+    }
+
+    return Optional.empty();
   }
 }

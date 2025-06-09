@@ -26,13 +26,14 @@ import lombok.Data;
 public class Article implements Serializable {
   @Transient
   private static final long serialVersionUID = -6249794470754667710L;
+
   @Id
   @Column(name = "id", nullable = false, updatable = false)
   @GeneratedValue(strategy = GenerationType.UUID)
   @Schema(description = "Unique identifier for the article.", example = "123e4567-e89b-12d3-a456-426614174000")
   private String id;
 
-  @Column(name = "title", nullable = false, length = 255)
+  @Column(name = "title", nullable = false, length = 255, unique = true)
   @Schema(description = "Title of the article.", example = "Introduction to Java")
   private String title;
 

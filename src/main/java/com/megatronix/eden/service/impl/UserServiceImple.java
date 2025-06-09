@@ -20,7 +20,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.server.HttpServerRequest;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,43 +92,55 @@ public class UserServiceImple implements IUserService {
     return ResultResponse.success(ResultEnum.SUCCESS, "OTP sent successfully.");
   }
 
+  // @Override
+  // public ResultResponse<AuthUser> validateCaptcha(String email, String
+  // verificationCode) {
+  //
+  // if (!Validator.isEmail(email)) {
+  // return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
+  // }
+  //
+  // if (!userRepository.existsUserByEmail(email)) {
+  // return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
+  // }
+  //
+  // String captcha = redisUtil.get(RedisConstant.CAPTCHA_PREFIX + email,
+  // String.class).orElse(null);
+  //
+  // if (StrUtil.isBlank(captcha)) {
+  // return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
+  // }
+  //
+  // if (StrUtil.equals(verificationCode, captcha)) {
+  //
+  // User user = userRepository.findUserByemail(email)
+  // .orElseThrow(() -> new
+  // UsernameNotFoundException(ResultEnum.USER_NOT_FOUND.getMessage()));
+  //
+  // Authentication authentication = new
+  // UsernamePasswordAuthenticationToken(user.getEmail(), null);
+  //
+  // SecurityContextHolder.getContext().setAuthentication(authentication);
+  //
+  // String authorization = jwtUtil.generateAuthorization(authentication);
+  //
+  // return ResultResponse.success(ResultEnum.SUCCESS,
+  // new AuthUser(user.getId(), user.getUsername(), user.getEmail(),
+  // authorization,
+  // Optional.of(user.getAvatar())));
+  // }
+  // return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
+  // }
+
   @Override
-  public ResultResponse<AuthUser> validateCaptcha(String email, String verificationCode) {
+  public ResultResponse<AuthUser> authenticateUser(UserAuthPayload userAuthPayload,
+      HttpServletRequest httpServerRequest) {
+    String clientIp = httpServerRequest.getRemoteAddr();
 
-    if (!Validator.isEmail(email)) {
-      return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
+    String forwardedFor = httpServerRequest.getHeader("X-Forwarded-For");
+    if (forwardedFor != null) {
+      clientIp = forwardedFor.split(",")[0];
     }
-
-    if (!userRepository.existsUserByEmail(email)) {
-      return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
-    }
-
-    String captcha = redisUtil.get(RedisConstant.CAPTCHA_PREFIX + email, String.class).orElse(null);
-
-    if (StrUtil.isBlank(captcha)) {
-      return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
-    }
-
-    if (StrUtil.equals(verificationCode, captcha)) {
-
-      User user = userRepository.findUserByemail(email)
-          .orElseThrow(() -> new UsernameNotFoundException(ResultEnum.USER_NOT_FOUND.getMessage()));
-
-      Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null);
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-
-      String authorization = jwtUtil.generateAuthorization(authentication);
-
-      return ResultResponse.success(ResultEnum.SUCCESS,
-          new AuthUser(user.getId(), user.getUsername(), user.getEmail(), authorization,
-              Optional.of(user.getAvatar())));
-    }
-    return ResultResponse.error(ResultEnum.INVALID_CAPTCHA);
-  }
-
-  @Override
-  public ResultResponse<AuthUser> authenticateUser(UserAuthPayload userAuthPayload) {
 
     if (!Validator.isEmail(userAuthPayload.getEmail())) {
       return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
@@ -139,19 +153,21 @@ public class UserServiceImple implements IUserService {
     User user = userRepository.findUserByemail(userAuthPayload.getEmail())
         .orElseThrow(() -> new UsernameNotFoundException(ResultEnum.USER_NOT_FOUND.getMessage()));
 
+    user.setLastLoginIp(clientIp);
+
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     String authorization = jwtUtil.generateAuthorization(authentication);
 
     return ResultResponse.success(ResultEnum.SUCCESS,
         new AuthUser(user.getId(), user.getUsername(), user.getEmail(), authorization,
-            Optional.of(user.getAvatar())));
+            Optional.of(user.getAvatar()), user.getLastLoginIp()));
 
   }
 
   @Override
   @Transactional
-  public ResultResponse<AuthUser> createAccount(UserAuthPayload userAuthPayload) {
+  public ResultResponse<AuthUser> createAccount(UserAuthPayload userAuthPayload, HttpServletRequest httpServerRequest) {
 
     if (!Validator.isEmail(userAuthPayload.getEmail())) {
       return ResultResponse.error(ResultEnum.INVALID_EMAIL_FORMAT);
@@ -176,7 +192,7 @@ public class UserServiceImple implements IUserService {
 
     userRepository.save(user);
 
-    return authenticateUser(userAuthPayload);
+    return authenticateUser(userAuthPayload, httpServerRequest);
   }
 
   @Override
@@ -260,5 +276,19 @@ public class UserServiceImple implements IUserService {
     } catch (Exception e) {
       return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
     }
+  }
+
+  @Override
+  public ResultResponse<String> updateLastLoginIp(String uid, String ip) {
+    Optional<User> optionalUser = userRepository.findById(uid);
+    if (optionalUser.isEmpty()) {
+      return ResultResponse.error(ResultEnum.USER_NOT_FOUND);
+    }
+
+    User user = optionalUser.get();
+    user.setLastLoginIp(ip);
+    userRepository.save(user);
+
+    return ResultResponse.success(ResultEnum.SUCCESS, "Last login IP updated");
   }
 }
