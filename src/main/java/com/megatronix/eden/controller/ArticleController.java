@@ -31,6 +31,7 @@ public class ArticleController {
 
   @PostMapping
   public ResultResponse<String> create(@RequestBody Article article) {
+    log.info(article.toString());
     return articleService.create(article);
   }
 }

@@ -47,7 +47,7 @@ public class UserController {
   @PostMapping
   public ResultResponse<AuthUser> createAccount(@RequestBody UserAuthPayload userAuthPayload,
       HttpServletRequest httpServerRequest) {
-    return userService.createAccount(userAuthPayload);
+    return userService.createAccount(userAuthPayload, httpServerRequest);
   }
 
   /**
@@ -78,20 +78,26 @@ public class UserController {
    *                           during captcha validation")
    *                           })
    */
-  @Operation(summary = "Validate Captcha", description = "This API validates the captcha entered by the user for the specified email address. "
-      + "If the captcha is correct, the user details will be returned for further authentication.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Captcha validated successfully, user details returned"),
-      @ApiResponse(responseCode = "400", description = "Invalid captcha code or email address"),
-      @ApiResponse(responseCode = "404", description = "User not found for the provided email address"),
-      @ApiResponse(responseCode = "500", description = "Internal server error during captcha validation")
-  })
-  @PostMapping("/validateCaptcha/{email}/{verificationCode}")
-  public ResultResponse<AuthUser> validateCaptcha(
-      @PathVariable("email") String email,
-      @PathVariable("verificationCode") String verificationCode) {
-    return userService.validateCaptcha(email, verificationCode);
-  }
+  // @Operation(summary = "Validate Captcha", description = "This API validates
+  // the captcha entered by the user for the specified email address. "
+  // + "If the captcha is correct, the user details will be returned for further
+  // authentication.")
+  // @ApiResponses(value = {
+  // @ApiResponse(responseCode = "200", description = "Captcha validated
+  // successfully, user details returned"),
+  // @ApiResponse(responseCode = "400", description = "Invalid captcha code or
+  // email address"),
+  // @ApiResponse(responseCode = "404", description = "User not found for the
+  // provided email address"),
+  // @ApiResponse(responseCode = "500", description = "Internal server error
+  // during captcha validation")
+  // })
+  // @PostMapping("/validateCaptcha/{email}/{verificationCode}")
+  // public ResultResponse<AuthUser> validateCaptcha(
+  // @PathVariable("email") String email,
+  // @PathVariable("verificationCode") String verificationCode) {
+  // return userService.validateCaptcha(email, verificationCode);
+  // }
 
   /**
    * Request a verification code for the provided email address.
