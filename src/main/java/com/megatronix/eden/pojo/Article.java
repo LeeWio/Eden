@@ -11,15 +11,16 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.megatronix.eden.enums.ArticleStatusEnum;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Table(name = "article")
-@Data
+@Setter
+@Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Schema(description = "Represents an article in the blogging system.")
@@ -86,14 +87,12 @@ public class Article implements Serializable {
   @Schema(description = "Date and time when the article was last updated.", example = "2025-01-02T15:00:00Z")
   private Date updateAt;
 
-  @ManyToMany
-  @JsonIgnoreProperties(value = { "articles" })
   @JoinTable(name = "article_tag", joinColumns = @JoinColumn(name = "article_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
   @Schema(description = "Tags associated with the article.")
+  @ManyToMany(fetch = FetchType.LAZY)
   private Set<Tag> tags;
 
-  @ManyToMany
-  @JsonIgnoreProperties(value = { "articles" })
+  @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "article_category", joinColumns = @JoinColumn(name = "article_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
   @Schema(description = "Categories associated with this article.")
   private Set<Category> categories;

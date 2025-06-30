@@ -8,25 +8,24 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Data
 @Table(name = "tag")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Setter
-@Getter
+@Data
 @Schema(description = "Tag entity representing a category or label used to organize articles")
 public class Tag implements Serializable {
 
@@ -54,7 +53,8 @@ public class Tag implements Serializable {
   // "2024-01-02T12:00:00Z")
   // private Date updatedAt;
 
-  @ManyToMany(mappedBy = "tags")
   @Schema(description = "Articles associated with the tag.")
+  @JsonIgnoreProperties(value = "tags")
+  @ManyToMany(fetch = FetchType.LAZY, targetEntity = Article.class, mappedBy = "tags")
   private Set<Article> articles;
 }

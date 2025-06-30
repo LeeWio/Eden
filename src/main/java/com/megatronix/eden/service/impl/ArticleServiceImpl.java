@@ -11,8 +11,10 @@ import com.megatronix.eden.service.IArticleService;
 import com.megatronix.eden.util.ResultResponse;
 
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class ArticleServiceImpl implements IArticleService {
   @Resource
   private ArticleRepository articleRepository;

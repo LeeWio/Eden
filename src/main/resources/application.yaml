@@ -30,6 +30,7 @@ spring:
     password: guest
   jpa:
     show-sql: true
+    open-in-view: true
   servlet:
     multipart:
       max-file-size: 10MB

@@ -8,15 +8,16 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -54,8 +55,8 @@ public class Category implements Serializable {
   @Schema(description = "Timestamp when the category was last updated", example = "2024-01-02T12:00:00Z")
   private Date updatedAt;
 
-  @ManyToMany
-  @JoinTable(name = "article_category", joinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "article_id", referencedColumnName = "id"))
+  @ManyToMany(fetch = FetchType.LAZY, targetEntity = Article.class, mappedBy = "categories")
+  @JsonIgnoreProperties(value = { "categories" })
   @Schema(description = "Articles under this category.")
   private Set<Article> articles;
 }
